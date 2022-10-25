@@ -23,7 +23,6 @@ jobs:
           
       - name: Download OpenSearch Security Plugin
         run: wget -O opensearch-security.zip https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/3.0.0/latest/linux/x64/tar/builds/opensearch/plugins/opensearch-security-3.0.0.0.zip
-        
 
       - name: Run OpenSearch with plugin
         run: |
@@ -48,7 +47,7 @@ jobs:
           EOF
         
       - name: Actual Run of OpenSearch with plugin
-        run: RUNNER_TRACKING_ID="" && docker run -d -p 9200:9200 -p 9600:9600 -i opensearch-test:latest
+        run: RUNNER_TRACKING_ID="" && (nohup docker run -d -p 9200:9200 -p 9600:9600 -i opensearch-test:latest)
 
   call-test-workflow:
     uses: RyanL1997/security-dashboards-plugin/.github/workflows/new-cypress.yml@ci-test-main-aggregation-view
