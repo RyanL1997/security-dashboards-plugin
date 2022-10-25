@@ -1,0 +1,58 @@
+name: NEW Tests
+
+on: [push, pull_request]
+
+env:
+  TEST_BROWSER_HEADLESS: 1
+  CI: 1
+  FTR_PATH: 'ftr'
+  START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --opensearch_security.multitenancy.enable_aggregation_view=true'
+  OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot'
+  SPEC: 'cypress/integration/plugins/security-dashboards-plugin/aggregation_view.js,'
+
+jobs:
+  call-test-workflow:
+    uses: RyanL1997/security-dashboards-plugin/.github/workflows/setup-action.yml@ci-test-main-aggregation-view
+
+  tests:
+    name: Run aggregation view cypress test
+    runs-on: ubuntu-latest
+    needs: call-test-workflow
+
+    steps:
+      - name: Bootstrap OpenSearch Dashboards
+        continue-on-error: false
+        run: |
+          cd ./OpenSearch-Dashboards
+          yarn osd bootstrap
+          echo 'server.host: "0.0.0.0"' >> ./config/opensearch_dashboards.yml
+          echo 'opensearch.hosts: ["https://localhost:9200"]' >> ./config/opensearch_dashboards.yml
+          echo 'opensearch.ssl.verificationMode: none' >> ./config/opensearch_dashboards.yml
+          echo 'opensearch.username: "kibanaserver"' >> ./config/opensearch_dashboards.yml
+          echo 'opensearch.password: "kibanaserver"' >> ./config/opensearch_dashboards.yml
+          echo 'opensearch.requestHeadersWhitelist: [ authorization,securitytenant ]' >> ./config/opensearch_dashboards.yml
+          echo 'opensearch_security.multitenancy.enabled: true' >> ./config/opensearch_dashboards.yml
+          echo 'opensearch_security.multitenancy.tenants.preferred: ["Private", "Global"]' >> ./config/opensearch_dashboards.yml
+          echo 'opensearch_security.readonly_mode.roles: ["kibana_read_only"]' >> ./config/opensearch_dashboards.yml
+          echo 'opensearch_security.cookie.secure: false' >> ./config/opensearch_dashboards.yml
+          echo 'opensearch_security.multitenancy.enable_aggregation_view: true' >> ./config/opensearch_dashboards.yml
+          yarn start --no-base-path --no-watch &
+          sleep 300
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: ${{ env.FTR_PATH }}
+          repository: RyanL1997/opensearch-dashboards-functional-test
+          ref: 'saved-objects-test'
+
+      - name: Get Cypress version
+        id: cypress_version
+        run: |
+          echo "::set-output name=cypress_version::$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')"
+      
+      - name: Run tests
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: ${{ env.FTR_PATH }}
+          command: yarn cypress:run-with-security-and-aggregation-view --browser chromium --spec ${{ env.SPEC }}
