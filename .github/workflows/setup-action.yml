@@ -47,7 +47,9 @@ jobs:
           WORKDIR /opensearch/
           ENTRYPOINT /docker-host/os-ep.sh
           EOF
-          docker run -d -p 9200:9200 -p 9600:9600 -i opensearch-test:latest
+
+      - name: Actual Run of OpenSearch with plugin
+        run: nohup docker run -d -p 9200:9200 -p 9600:9600 -i opensearch-test:latest
             
       - name: Check OpenSearch Running
         continue-on-error: true
