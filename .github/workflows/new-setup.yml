@@ -45,13 +45,6 @@ jobs:
           WORKDIR /opensearch/
           ENTRYPOINT /docker-host/os-ep.sh
           EOF
-        
-      - name: Actual Run of OpenSearch with plugin
-        run: RUNNER_TRACKING_ID="" && (nohup docker run -d -p 9200:9200 -p 9600:9600 -i opensearch-test:latest)
-            
-      - name: Check OpenSearch Running
-        continue-on-error: true
-        run: curl -XGET https://localhost:9200 -u 'admin:admin' -k
 
   call-test-workflow:
     uses: RyanL1997/security-dashboards-plugin/.github/workflows/new-cypress.yml@ci-test-main-aggregation-view
