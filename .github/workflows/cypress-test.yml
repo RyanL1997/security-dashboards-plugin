@@ -94,7 +94,6 @@ jobs:
         run: curl -XGET https://localhost:9200 -u 'admin:admin' -k
 
       - name: Bootstrap OpenSearch Dashboards
-        continue-on-error: false
         run: |
           cd ./OpenSearch-Dashboards
           yarn osd bootstrap
