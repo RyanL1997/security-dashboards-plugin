@@ -29,6 +29,7 @@ import { Options } from 'selenium-webdriver/firefox';
 describe('start OpenSearch Dashboards server', () => {
   let root: Root;
   let config;
+  let originalDynamicConfig;
 
   // XPath Constants
   const userIconBtnXPath = '//button[@id="user-icon-btn"]';
@@ -132,34 +133,64 @@ describe('start OpenSearch Dashboards server', () => {
     );
     const responseBody = (getConfigResponse.payload as Buffer).toString();
     config = JSON.parse(responseBody).config;
-    const samlConfig = {
-      http_enabled: true,
-      transport_enabled: false,
-      order: 5,
-      http_authenticator: {
-        challenge: true,
-        type: 'saml',
-        config: {
-          idp: {
-            metadata_url: 'http://localhost:7000/metadata',
-            entity_id: 'urn:example:idp',
+    originalDynamicConfig = config.dynamic;
+    /*
+     * 1. Remove config
+     * 2. Add testconfig
+     * 3. test
+     * 4. Remove test config
+     * 5. Add original config back
+     */
+    
+    const testDynamicConfig = {
+      http: {
+        anonymous_auth_enabled: false
+      },
+      authc: {
+        basic_internal_auth_domain: {
+          http_enabled: true,
+          transport_enabled: true,
+          order: 0,
+          http_authenticator: {
+            type: 'basic',
+            challenge: false
           },
-          sp: {
-            entity_id: 'https://localhost:9200',
-          },
-          kibana_url: 'http://localhost:5601',
-          exchange_key: '6aff3042-1327-4f3d-82f0-40a157ac4464',
+          authentication_backend: {
+            type: 'intern',
+            config: {},
+          }
         },
-      },
-      authentication_backend: {
-        type: 'noop',
-        config: {},
-      },
-    };
+        saml_auth_domain: {
+          http_enabled: true,
+          transport_enabled: false,
+          order: 5,
+          http_authenticator: {
+            challenge: true,
+            type: 'saml',
+            config: {
+              idp: {
+                metadata_url: 'http://localhost:7000/metadata',
+                entity_id: 'urn:example:idp',
+              },
+              sp: {
+                entity_id: 'https://localhost:9200',
+              },
+              kibana_url: 'http://localhost:5601',
+              exchange_key: '6aff3042-1327-4f3d-82f0-40a157ac4464',
+            },
+          },
+          authentication_backend: {
+            type: 'noop',
+            config: {},
+          }
+        }
+      }
+    }
+
     try {
-      config.dynamic!.authc!.saml_auth_domain = samlConfig;
-      config.dynamic!.authc!.basic_internal_auth_domain.http_authenticator.challenge = false;
-      config.dynamic!.http!.anonymous_auth_enabled = false;
+      //config.dynamic! = testDynamicConfig;
+      delete config.dynamic;
+      config.dynamic = testDynamicConfig;
       await wreck.put('https://localhost:9200/_plugins/_security/api/securityconfig/config', {
         payload: config,
         rejectUnauthorized: false,
@@ -212,15 +243,12 @@ describe('start OpenSearch Dashboards server', () => {
       .catch((value) => {
         Promise.resolve(value);
       });
-    console.log('Remove the Security Config');
-    await wreck
-      .patch('https://localhost:9200/_plugins/_security/api/securityconfig', {
-        payload: [
-          {
-            op: 'remove',
-            path: '/config/dynamic/authc/saml_auth_domain',
-          },
-        ],
+    
+      delete config.dynamic;
+      config.dynamic = originalDynamicConfig;
+      console.log('Update config again')
+      await wreck.put('https://localhost:9200/_plugins/_security/api/securityconfig/config', {
+        payload: config,
         rejectUnauthorized: false,
         headers: {
           'Content-Type': 'application/json',
