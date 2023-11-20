@@ -276,6 +276,10 @@ export function LoginPage(props: LoginPageDeps) {
         {formOptions(props.config.auth.type)}
         {errorLabel}
       </EuiForm>
+      <EuiSpacer size="s" />
+      <EuiText size="s" textAlign="left">
+        {'By loggin in, you accept the terms of use for the OpenSearch playground'}
+      </EuiText>
     </EuiListGroup>
   );
 }
