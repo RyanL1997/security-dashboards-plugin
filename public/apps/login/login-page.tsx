@@ -25,6 +25,13 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiLink,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiOverlayMask,
+  EuiModalFooter,
 } from '@elastic/eui';
 import { CoreStart } from '../../../../../src/core/public';
 import { ClientConfigType } from '../../types';
@@ -81,6 +88,11 @@ export function LoginPage(props: LoginPageDeps) {
   const [loginError, setloginError] = useState('');
   const [usernameValidationFailed, setUsernameValidationFailed] = useState(false);
   const [passwordValidationFailed, setPasswordValidationFailed] = useState(false);
+
+  const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
+
+  const openTermsModal = () => setIsTermsModalVisible(true);
+  const closeTermsModal = () => setIsTermsModalVisible(false);
 
   let errorLabel: any = null;
   if (loginFailed) {
@@ -164,6 +176,24 @@ export function LoginPage(props: LoginPageDeps) {
         authOpts = [...options];
       }
     }
+
+    const renderTermsModal = () => {
+      if (!isTermsModalVisible) return null;
+
+      return (
+        <EuiOverlayMask>
+          <EuiModal onClose={closeTermsModal} maxWidth={600}>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>Terms of Use</EuiModalHeaderTitle>
+            </EuiModalHeader>
+            <EuiModalBody>
+              {/* Replace "xxxxx" with the actual terms of use content */}
+              <p>xxxxx</p>
+            </EuiModalBody>
+          </EuiModal>
+        </EuiOverlayMask>
+      );
+    };
 
     for (let i = 0; i < authOpts.length; i++) {
       switch (authOpts[i].toLowerCase()) {
@@ -278,8 +308,29 @@ export function LoginPage(props: LoginPageDeps) {
       </EuiForm>
       <EuiSpacer size="s" />
       <EuiText size="s" textAlign="left">
-        {'By loggin in, you accept the terms of use for the OpenSearch playground'}
+        By logging in, you accept the <EuiLink onClick={openTermsModal}>terms of use</EuiLink>
+        {' for the OpenSearch playground.'}
       </EuiText>
+      {isTermsModalVisible && (
+        <EuiOverlayMask>
+          <EuiModal onClose={closeTermsModal} maxWidth={700}>
+            <EuiModalHeader>
+              <EuiModalHeaderTitle>Terms of Use</EuiModalHeaderTitle>
+            </EuiModalHeader>
+            <EuiModalBody>
+              {/* Replace "xx"s with the actual terms of use content */}
+              <p>
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+              </p>
+            </EuiModalBody>
+            <EuiModalFooter>
+              <EuiButton onClick={closeTermsModal}>Close</EuiButton>
+            </EuiModalFooter>
+          </EuiModal>
+        </EuiOverlayMask>
+      )}
     </EuiListGroup>
   );
 }
