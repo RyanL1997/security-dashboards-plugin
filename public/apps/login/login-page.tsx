@@ -158,6 +158,31 @@ export function LoginPage(props: LoginPageDeps) {
     );
   };
 
+  const renderTermsModal = () => {
+    if (!isTermsModalVisible) return null;
+
+    return (
+      <EuiOverlayMask>
+        <EuiModal onClose={closeTermsModal} maxWidth={700}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Terms of Use</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            {/* Replace "xx"s with the actual terms of use content */}
+            <p>
+              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            </p>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton onClick={closeTermsModal}>Close</EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      </EuiOverlayMask>
+    );
+  };
+
   const formOptions = (options: string | string[]) => {
     let formBody = [];
     const formBodyOp = [];
@@ -176,24 +201,6 @@ export function LoginPage(props: LoginPageDeps) {
         authOpts = [...options];
       }
     }
-
-    const renderTermsModal = () => {
-      if (!isTermsModalVisible) return null;
-
-      return (
-        <EuiOverlayMask>
-          <EuiModal onClose={closeTermsModal} maxWidth={600}>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>Terms of Use</EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              {/* Replace "xxxxx" with the actual terms of use content */}
-              <p>xxxxx</p>
-            </EuiModalBody>
-          </EuiModal>
-        </EuiOverlayMask>
-      );
-    };
 
     for (let i = 0; i < authOpts.length; i++) {
       switch (authOpts[i].toLowerCase()) {
@@ -308,29 +315,11 @@ export function LoginPage(props: LoginPageDeps) {
       </EuiForm>
       <EuiSpacer size="s" />
       <EuiText size="s" textAlign="left">
-        By logging in, you accept the <EuiLink onClick={openTermsModal}>terms of use</EuiLink>
+        {'By logging in, you accept the '}
+        <EuiLink onClick={openTermsModal}> {'terms of use'}</EuiLink>
         {' for the OpenSearch playground.'}
       </EuiText>
-      {isTermsModalVisible && (
-        <EuiOverlayMask>
-          <EuiModal onClose={closeTermsModal} maxWidth={700}>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>Terms of Use</EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              {/* Replace "xx"s with the actual terms of use content */}
-              <p>
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-              </p>
-            </EuiModalBody>
-            <EuiModalFooter>
-              <EuiButton onClick={closeTermsModal}>Close</EuiButton>
-            </EuiModalFooter>
-          </EuiModal>
-        </EuiOverlayMask>
-      )}
+      {renderTermsModal()}
     </EuiListGroup>
   );
 }
