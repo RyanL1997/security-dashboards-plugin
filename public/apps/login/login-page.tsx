@@ -25,6 +25,13 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiLink,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiOverlayMask,
+  EuiModalFooter,
 } from '@elastic/eui';
 import { CoreStart } from '../../../../../src/core/public';
 import { ClientConfigType } from '../../types';
@@ -35,6 +42,7 @@ import {
   OPENID_AUTH_LOGIN,
   SAML_AUTH_LOGIN_WITH_FRAGMENT,
 } from '../../../common';
+import { termsOfUseText } from '../../utils/terms-of-use-utils';
 
 interface LoginPageDeps {
   http: CoreStart['http'];
@@ -81,6 +89,11 @@ export function LoginPage(props: LoginPageDeps) {
   const [loginError, setloginError] = useState('');
   const [usernameValidationFailed, setUsernameValidationFailed] = useState(false);
   const [passwordValidationFailed, setPasswordValidationFailed] = useState(false);
+
+  const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
+
+  const openTermsModal = () => setIsTermsModalVisible(true);
+  const closeTermsModal = () => setIsTermsModalVisible(false);
 
   let errorLabel: any = null;
   if (loginFailed) {
@@ -143,6 +156,36 @@ export function LoginPage(props: LoginPageDeps) {
           {buttonConfig.buttonname}
         </EuiButton>
       </EuiFormRow>
+    );
+  };
+
+  const renderTermsModal = () => {
+    if (!isTermsModalVisible) return null;
+
+    const termsParagraphs = termsOfUseText
+      .trim()
+      .split('\n\n')
+      .map((paragraph, index, array) => (
+        <p
+          key={`terms-paragraph-${index}`}
+          style={{ lineHeight: '1.2', marginBottom: index === array.length - 1 ? '0' : '20px' }}
+        >
+          {paragraph.trim()}
+        </p>
+      ));
+
+    return (
+      <EuiOverlayMask>
+        <EuiModal onClose={closeTermsModal} maxWidth={650}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Terms of Use</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>{termsParagraphs}</EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton onClick={closeTermsModal}>Close</EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      </EuiOverlayMask>
     );
   };
 
@@ -276,6 +319,13 @@ export function LoginPage(props: LoginPageDeps) {
         {formOptions(props.config.auth.type)}
         {errorLabel}
       </EuiForm>
+      <EuiSpacer size="s" />
+      <EuiText size="s" textAlign="left">
+        {'By logging in, you accept the '}
+        <EuiLink onClick={openTermsModal}> {'terms of use'}</EuiLink>
+        {' for the OpenSearch playground.'}
+      </EuiText>
+      {renderTermsModal()}
     </EuiListGroup>
   );
 }
