@@ -42,6 +42,7 @@ import {
   OPENID_AUTH_LOGIN,
   SAML_AUTH_LOGIN_WITH_FRAGMENT,
 } from '../../../common';
+import { termsOfUseText } from '../../utils/terms-of-use-utils';
 
 interface LoginPageDeps {
   http: CoreStart['http'];
@@ -161,20 +162,25 @@ export function LoginPage(props: LoginPageDeps) {
   const renderTermsModal = () => {
     if (!isTermsModalVisible) return null;
 
+    const termsParagraphs = termsOfUseText
+      .trim()
+      .split('\n\n')
+      .map((paragraph, index, array) => (
+        <p
+          key={`terms-paragraph-${index}`}
+          style={{ lineHeight: '1.2', marginBottom: index === array.length - 1 ? '0' : '20px' }}
+        >
+          {paragraph.trim()}
+        </p>
+      ));
+
     return (
       <EuiOverlayMask>
-        <EuiModal onClose={closeTermsModal} maxWidth={700}>
+        <EuiModal onClose={closeTermsModal} maxWidth={650}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>Terms of Use</EuiModalHeaderTitle>
           </EuiModalHeader>
-          <EuiModalBody>
-            {/* Replace "xx"s with the actual terms of use content */}
-            <p>
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-              xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-            </p>
-          </EuiModalBody>
+          <EuiModalBody>{termsParagraphs}</EuiModalBody>
           <EuiModalFooter>
             <EuiButton onClick={closeTermsModal}>Close</EuiButton>
           </EuiModalFooter>
