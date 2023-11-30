@@ -33,7 +33,7 @@ jobs:
           echo "PLUGIN_VERSION=$plugin_version" >> $GITHUB_ENV
         shell: bash
 
-      - uses: browser-actions/setup-geckodriver@v0.0.0
+      - uses: browser-actions/setup-geckodriver@latest
       - run: geckodriver --version
 
       - name: Set up Firefox browser
